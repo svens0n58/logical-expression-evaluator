@@ -138,3 +138,44 @@ class LogicalExpression():
             print(self.operators_evaluations[self._main_connective_position],
                   end='  /  ')
             print(*evaluations_right, sep='  ')
+
+    def _check_user_values(self, values):
+        for key, value in values.items():
+            if key not in self.var:
+                raise ValueError(f"Variable {key} was specified but does not"
+                                 f" exist in the expression. This is the list"
+                                 f" of variables in the expression {self.var}")
+
+            if not isinstance(value, float) and not isinstance(value, int):
+                raise TypeError(f"Value specified for variable {key} is not of"
+                                f" int or float type, it is of {type(value)}")
+            if value < 0 or value > 1:
+                raise ValueError(f"Value specified for variable {key} is "
+                                 f" {value} which is not in the range [0, 1].")
+
+    def evaluate_expression(self, **values):
+        self._check_user_values(values)
+
+        tree = self._expression_tree
+
+        print(*self.var, sep='  ', end='  /  ')
+        expression = [token.value for token in self.exp]
+        expression_left = expression[:self._main_connective_position]
+        expression_right = expression[self._main_connective_position+1:]
+
+        print(*expression_left, sep='  ', end='  /  ')
+        print(expression[self._main_connective_position], end='  /  ')
+        print(*expression_right, sep='  ')
+        print("-" * (3 * len(self.var) + 3 * len(self.exp) + 7))
+
+        print(*values.values(), sep='  ', end='  /  ')
+
+        self._evaluate_tree(tree, values)
+        evaluations_left = \
+            self.operators_evaluations[:self._main_connective_position]
+        evaluations_right = \
+            self.operators_evaluations[self._main_connective_position+1:]
+        print(*evaluations_left, sep='  ', end='  /  ')
+        print(self.operators_evaluations[self._main_connective_position],
+              end='  /  ')
+        print(*evaluations_right, sep='  ')
