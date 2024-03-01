@@ -1,4 +1,4 @@
 from src.expression import LogicalExpression
 
-expression = LogicalExpression("!(C) | ~B")
+expression = LogicalExpression("A <-> B")
 expression.truth_table()

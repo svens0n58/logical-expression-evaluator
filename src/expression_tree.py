@@ -21,7 +21,7 @@ def build_tree(s):
         else:
             p = TreeNode(s[0])
             # Build the left sub-tree
-            p.left, q = build_tree(s[1:])
+            p.right, q = build_tree(s[1:])
             # Build the right sub-tree
-            p.right, q = build_tree(q)
+            p.left, q = build_tree(q)
             return p, q

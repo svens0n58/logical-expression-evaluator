@@ -13,7 +13,7 @@ when & !C A ! B) [DONE]
 
 class LogicalExpression():
     def __init__(self, expression: str):
-        self.exp = _tokenize_expression(expression)
+        self._exp = _tokenize_expression(expression)
         self._prefix_exp, self._main_connective_position = \
             infix_to_prefix(self.exp)
         self._var = self._extract_variables()
@@ -33,6 +33,14 @@ class LogicalExpression():
     @property
     def var(self):
         return self._var
+
+    @property
+    def exp(self):
+        return self._exp
+
+    @exp.setter
+    def exp(self, expression):
+        self.__init__(expression)
 
     @property
     def expression_tree(self):
@@ -86,6 +94,16 @@ class LogicalExpression():
         elif root.type == TokenType.NEGATION:
             self.operators_evaluations[root.position] = 1 - left_side
             return 1 - left_side
+
+        elif root.data == "->":
+            self.operators_evaluations[root.position] = \
+                min(1, 1 - left_side + right_side)
+            return min(1, 1 - left_side + right_side)
+
+        elif root.data == "<->":
+            self.operators_evaluations[root.position] = \
+                1 - abs(left_side - right_side)
+            return 1 - abs(left_side - right_side)
 
     def _create_dict(self, comb):
         values = {}
