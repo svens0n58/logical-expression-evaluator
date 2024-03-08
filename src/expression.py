@@ -23,16 +23,12 @@ class LogicalExpression():
                                        else ' ' for i in range(len(self.exp))]
 
     @property
-    def operators(self):
-        return self._operators
-
-    @property
-    def symbols(self):
-        return self._symbols
-
-    @property
     def var(self):
         return self._var
+
+    @property
+    def operators_positions(self):
+        return self._operators_positions
 
     @property
     def exp(self):
@@ -74,6 +70,8 @@ class LogicalExpression():
             return 0
 
         if root.left is None and root.right is None:
+            if not self.operators_positions:
+                self.operators_evaluations[root.position] = values[root.data]
             return values[root.data]
 
         left_side = self._evaluate_tree(root.left, values)
@@ -111,33 +109,48 @@ class LogicalExpression():
             values[self.var[i]] = c
         return values
 
-    def truth_table(self):
+    def _print_first_line(self):
+        length_expression = 3 * len(self.var) + 3 * len(self.exp) + 7 + \
+            sum([token.additional_space for token in self.exp])
+        if self._main_connective_position == 0:
+            length_expression -= 3
         print(*self.var, sep='  ', end='  /  ')
         expression = [token.value for token in self.exp]
         expression_left = expression[:self._main_connective_position]
         expression_right = expression[self._main_connective_position+1:]
-
-        print(*expression_left, sep='  ', end='  /  ')
+        if expression_left:
+            print(*expression_left, sep='  ', end='  /  ')
         print(expression[self._main_connective_position], end='  /  ')
-        print(*expression_right, sep='  ')
-        print("-" * (3 * len(self.var) + 3 * len(self.exp) + 7))
+        if expression_right:
+            print(*expression_right, sep='  ')
+        else:
+            print("")
+        print("-" * length_expression)
 
-        tree = self._expression_tree
+    def _print_evaluation_line(self, values):
+        print(*values.values(), sep='  ', end='  /  ')
+        tree = self.expression_tree
+        self._evaluate_tree(tree, values)
+        evaluations_left = \
+            self.operators_evaluations[:self._main_connective_position]
+        evaluations_right = \
+            self.operators_evaluations[self._main_connective_position+1:]
+        if evaluations_left:
+            print(*evaluations_left, sep='  ', end='  /  ')
+        print(self.operators_evaluations[self._main_connective_position],
+              end='  /  ')
+        if evaluations_right:
+            print(*evaluations_right, sep='  ')
+        else:
+            print("")
+
+    def truth_table(self):
+        self._print_first_line()
         combinations = self._all_combinations(len(self.var))
 
         for comb in combinations:
-            print(*comb, sep='  ', end='  /  ')
             values = self._create_dict(comb)
-            self._evaluate_tree(tree, values)
-            # print(*self.operators_evaluations)
-            evaluations_left = \
-                self.operators_evaluations[:self._main_connective_position]
-            evaluations_right = \
-                self.operators_evaluations[self._main_connective_position+1:]
-            print(*evaluations_left, sep='  ', end='  /  ')
-            print(self.operators_evaluations[self._main_connective_position],
-                  end='  /  ')
-            print(*evaluations_right, sep='  ')
+            self._print_evaluation_line(values)
 
     def _check_user_values(self, values):
         for key, value in values.items():
@@ -156,26 +169,6 @@ class LogicalExpression():
     def evaluate_expression(self, **values):
         self._check_user_values(values)
 
-        tree = self._expression_tree
+        self._print_first_line()
 
-        print(*self.var, sep='  ', end='  /  ')
-        expression = [token.value for token in self.exp]
-        expression_left = expression[:self._main_connective_position]
-        expression_right = expression[self._main_connective_position+1:]
-
-        print(*expression_left, sep='  ', end='  /  ')
-        print(expression[self._main_connective_position], end='  /  ')
-        print(*expression_right, sep='  ')
-        print("-" * (3 * len(self.var) + 3 * len(self.exp) + 7))
-
-        print(*values.values(), sep='  ', end='  /  ')
-
-        self._evaluate_tree(tree, values)
-        evaluations_left = \
-            self.operators_evaluations[:self._main_connective_position]
-        evaluations_right = \
-            self.operators_evaluations[self._main_connective_position+1:]
-        print(*evaluations_left, sep='  ', end='  /  ')
-        print(self.operators_evaluations[self._main_connective_position],
-              end='  /  ')
-        print(*evaluations_right, sep='  ')
+        self._print_evaluation_line(values)

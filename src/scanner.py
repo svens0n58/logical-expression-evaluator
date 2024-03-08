@@ -14,10 +14,11 @@ class TokenType(Enum):
 
 
 class Token():
-    def __init__(self, value, type, position):
+    def __init__(self, value, type, position, additional_space=0):
         self._value = value
         self._type = type
-        self.position = position
+        self._position = position
+        self._additional_space = additional_space
 
     @property
     def value(self):
@@ -27,15 +28,23 @@ class Token():
     def type(self):
         return self._type
 
+    @property
+    def position(self):
+        return self._position
+
+    @property
+    def additional_space(self):
+        return self._additional_space
+
 
 def _match_operator(expression, position):
     if len(expression) - 1 >= position + 1 and expression[position] == '-' \
             and expression[position+1] == '>':
-        return "->", position + 1
+        return "->", position + 1, 1
     elif len(expression) - 1 >= position + 2 and expression[position] == '<' \
             and expression[position+1] == '-' and \
             expression[position+2] == '>':
-        return "<->", position + 2
+        return "<->", position + 2, 2
     else:
         raise ValueError("Provided expression is not valid.")
 
@@ -48,8 +57,9 @@ def _generate_token(expression, position, i):
         new_position = position
         new_token = Token(expression[position], TokenType.OPERATOR, i)
     elif expression[position] in START_OPERATORS:
-        operator, new_position = _match_operator(expression, position)
-        new_token = Token(operator, TokenType.OPERATOR, i)
+        operator, new_position, additional_space = \
+            _match_operator(expression, position)
+        new_token = Token(operator, TokenType.OPERATOR, i, additional_space)
     elif expression[position] in NEGATIONS:
         new_position = position
         new_token = Token(expression[position], TokenType.NEGATION, i)
