@@ -62,8 +62,11 @@ class LogicalExpression():
                 positions.append(i)
         return positions
 
-    def _all_combinations(self, n):
-        return list(product([1, 0], repeat=n))
+    def _all_combinations(self, n, logic):
+        if logic is None:
+            return list(product([1, 0], repeat=n))
+        elif logic == '3':
+            return list(product([1, 0.5, 0], repeat=n))
 
     def _evaluate_tree(self, root, values):
         if root is None:
@@ -82,25 +85,35 @@ class LogicalExpression():
         if root.data == '&':
             self.operators_evaluations[root.position] = min(left_side,
                                                             right_side)
+            if self.operators_evaluations[root.position] == 0.5:
+                self.operators_evaluations[root.position] = 'i'
             return min(left_side, right_side)
 
         elif root.data == '|':
             self.operators_evaluations[root.position] = max(left_side,
                                                             right_side)
+            if self.operators_evaluations[root.position] == 0.5:
+                self.operators_evaluations[root.position] = 'i'
             return max(left_side, right_side)
 
         elif root.type == TokenType.NEGATION:
             self.operators_evaluations[root.position] = 1 - left_side
+            if self.operators_evaluations[root.position] == 0.5:
+                self.operators_evaluations[root.position] = 'i'
             return 1 - left_side
 
         elif root.data == "->":
             self.operators_evaluations[root.position] = \
                 min(1, 1 - left_side + right_side)
+            if self.operators_evaluations[root.position] == 0.5:
+                self.operators_evaluations[root.position] = 'i'
             return min(1, 1 - left_side + right_side)
 
         elif root.data == "<->":
             self.operators_evaluations[root.position] = \
                 1 - abs(left_side - right_side)
+            if self.operators_evaluations[root.position] == 0.5:
+                self.operators_evaluations[root.position] = 'i'
             return 1 - abs(left_side - right_side)
 
     def _create_dict(self, comb):
@@ -128,7 +141,9 @@ class LogicalExpression():
         print("-" * length_expression)
 
     def _print_evaluation_line(self, values):
-        print(*values.values(), sep='  ', end='  /  ')
+        correct_format_values = ['i' if i == 0.5 else i for i in
+                                 values.values()]
+        print(*correct_format_values, sep='  ', end='  /  ')
         tree = self.expression_tree
         self._evaluate_tree(tree, values)
         evaluations_left = \
@@ -144,9 +159,9 @@ class LogicalExpression():
         else:
             print("")
 
-    def truth_table(self):
+    def truth_table(self, logic=None):
         self._print_first_line()
-        combinations = self._all_combinations(len(self.var))
+        combinations = self._all_combinations(len(self.var), logic)
 
         for comb in combinations:
             values = self._create_dict(comb)
