@@ -1,3 +1,5 @@
+# 2024 Sven van Loon
+
 from src.scanner import _tokenize_expression, TokenType, infix_to_prefix, Token
 from src.expression_tree import build_tree, TreeNode
 from itertools import product

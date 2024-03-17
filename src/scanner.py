@@ -1,3 +1,5 @@
+# 2024 Sven van Loon
+
 from enum import Enum
 from typing import Tuple, List
 

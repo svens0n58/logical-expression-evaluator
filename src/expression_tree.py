@@ -1,3 +1,5 @@
+# 2024 Sven van Loon
+
 from src.scanner import TokenType
 
 
