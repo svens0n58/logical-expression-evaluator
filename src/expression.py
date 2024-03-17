@@ -288,7 +288,7 @@ class LogicalExpression():
 
         Args:
             logic (str or None): Specifies the logic to be used. If None,
-            defaults to classical logic, if '3' Lukasiewicz logic.
+            defaults to propositional logic, if '3' Lukasiewicz logic.
 
         Returns:
             None: This function does not return anything. It prints the truth

@@ -38,3 +38,10 @@ The script supports the following logical operators:
 * '~': Logical NOT
 * '->': Logical CONDITIONAL
 * '<->: Logical BICONDITIONAL
+
+## Supported logic
+
+The script supports the following logics:
+
+* Propositional Logic
+* Lukasiewicz 3 valued Logic
