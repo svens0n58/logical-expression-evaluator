@@ -11,6 +11,19 @@ class TreeNode():
 
 
 def build_tree(s):
+    """
+    Build a binary tree from a prefix expression.
+
+    This function constructs a binary tree representing a logical expression
+    from a prefix expression represented as a list of tokens.
+
+    Args:
+        s (list): A list of tokens representing the prefix expression.
+
+    Returns:
+        tuple: A tuple containing the root node of the constructed tree
+            and the remaining tokens after constructing the tree.
+    """
     if s[0].type == TokenType.VARIABLE:
         return TreeNode(s[0]), s[1:]
     else:

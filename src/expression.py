@@ -155,7 +155,7 @@ class LogicalExpression():
 
         if root.left is None and root.right is None:
             if not self.operators_positions:
-                self.operators_evaluations[root.position] = values[root.data]
+                self.evaluations[root.position] = values[root.data]
             return values[root.data]
 
         left_side = self._evaluate_tree(root.left, values)
@@ -164,37 +164,35 @@ class LogicalExpression():
 
         # check which operation to apply
         if root.data == '&':
-            self.operators_evaluations[root.position] = min(left_side,
-                                                            right_side)
-            if self.operators_evaluations[root.position] == 0.5:
-                self.operators_evaluations[root.position] = 'i'
+            self.evaluations[root.position] = min(left_side, right_side)
+            if self.evaluations[root.position] == 0.5:
+                self.evaluations[root.position] = 'i'
             return min(left_side, right_side)
 
         elif root.data == '|':
-            self.operators_evaluations[root.position] = max(left_side,
-                                                            right_side)
-            if self.operators_evaluations[root.position] == 0.5:
-                self.operators_evaluations[root.position] = 'i'
+            self.evaluations[root.position] = max(left_side, right_side)
+            if self.evaluations[root.position] == 0.5:
+                self.evaluations[root.position] = 'i'
             return max(left_side, right_side)
 
         elif root.type == TokenType.NEGATION:
-            self.operators_evaluations[root.position] = 1 - left_side
-            if self.operators_evaluations[root.position] == 0.5:
-                self.operators_evaluations[root.position] = 'i'
+            self.evaluations[root.position] = 1 - left_side
+            if self.evaluations[root.position] == 0.5:
+                self.evaluations[root.position] = 'i'
             return 1 - left_side
 
         elif root.data == "->":
-            self.operators_evaluations[root.position] = \
+            self.evaluations[root.position] = \
                 min(1, 1 - left_side + right_side)
-            if self.operators_evaluations[root.position] == 0.5:
-                self.operators_evaluations[root.position] = 'i'
+            if self.evaluations[root.position] == 0.5:
+                self.evaluations[root.position] = 'i'
             return min(1, 1 - left_side + right_side)
 
         elif root.data == "<->":
-            self.operators_evaluations[root.position] = \
+            self.evaluations[root.position] = \
                 1 - abs(left_side - right_side)
-            if self.operators_evaluations[root.position] == 0.5:
-                self.operators_evaluations[root.position] = 'i'
+            if self.evaluations[root.position] == 0.5:
+                self.evaluations[root.position] = 'i'
             return 1 - abs(left_side - right_side)
 
     def _create_dict(self, comb: List) -> dict:
@@ -266,12 +264,12 @@ class LogicalExpression():
         tree = self.expression_tree
         self._evaluate_tree(tree, values)
         evaluations_left = \
-            self.operators_evaluations[:self._main_connective_position]
+            self.evaluations[:self._main_connective_position]
         evaluations_right = \
-            self.operators_evaluations[self._main_connective_position+1:]
+            self.evaluations[self._main_connective_position+1:]
         if evaluations_left:
             print(*evaluations_left, sep='  ', end='  /  ')
-        print(self.operators_evaluations[self._main_connective_position],
+        print(self.evaluations[self._main_connective_position],
               end='  /  ')
         if evaluations_right:
             print(*evaluations_right, sep='  ')

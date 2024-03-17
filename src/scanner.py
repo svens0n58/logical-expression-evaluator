@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Tuple, List
 
 OPERATORS = ['&', '|']
 START_OPERATORS = ['-', '<']
@@ -7,6 +8,10 @@ SYMBOLS = ['(', ')']
 
 
 class TokenType(Enum):
+    """
+        Tokens can be of four types:
+        operators, symvols, variables, and negations.
+    """
     OPERATOR = 1
     SYMBOL = 2
     VARIABLE = 3
@@ -37,7 +42,35 @@ class Token():
         return self._additional_space
 
 
-def _match_operator(expression, position):
+def _match_operator(expression: str, position: int) -> Tuple[str, int, int]:
+    """
+    Match logical operators in the expression starting from the specified
+    position.
+
+    This function examines the expression starting from the specified position
+    to identify logical operators ('->' for implication and '<->' for
+    biconditional). If a match is found, the operator string, its position,
+    and the number of characters consumed are returned.
+
+    Args:
+        expression (str): The logical expression to match operators within.
+        position (int): The starting position to begin matching within the
+        expression.
+
+    Returns:
+        tuple: A tuple containing the matched operator string, its position,
+        and the number of characters consumed.
+
+    Raises:
+        ValueError: If the provided expression does not contain a valid
+        logical operator starting from the specified position.
+
+    Example:
+        >>> _match_operator("p -> q", 2)
+        ('->', 3, 1)
+        >>> _match_operator("p <-> q", 2)
+        ('<->', 4, 2)
+    """
     if len(expression) - 1 >= position + 1 and expression[position] == '-' \
             and expression[position+1] == '>':
         return "->", position + 1, 1
@@ -49,7 +82,36 @@ def _match_operator(expression, position):
         raise ValueError("Provided expression is not valid.")
 
 
-def _generate_token(expression, position, i):
+def _generate_token(expression: str, position: int, i: int) -> Tuple[Token,
+                                                                     int] | \
+                                                                        None:
+    """
+    Generate a token from the character at the specified position in the
+    expression.
+
+    This function analyzes the character at the given position in the
+    expression and generates a token based on its type (variable, operator,
+    negation, symbol). It also handles cases where the character represents
+    special operators (e.g., '->' for implication, '<->' for biconditional).
+
+    Args:
+        expression (str): The logical expression from which to generate tokens.
+        position (int): The position in the expression to analyze.
+        i (int): The index of the token.
+
+    Returns:
+        tuple: A tuple containing the generated token and the new position in
+        the expression.
+
+    Raises:
+        ValueError: If the provided expression does not contain a valid
+        character at the specified position.
+
+    Example:
+        >>> _generate_token("p -> q", 2, 0)
+        (Token(value='->', token_type=<TokenType.OPERATOR: 1>, index=0,
+        additional_space=1), 4)
+    """
     if expression[position].isalpha():
         new_position = position
         new_token = Token(expression[position], TokenType.VARIABLE, i)
@@ -71,7 +133,32 @@ def _generate_token(expression, position, i):
     return new_token, new_position
 
 
-def _tokenize_expression(expression):
+def _tokenize_expression(expression: str) -> List[Token]:
+    """
+    Tokenize the logical expression.
+
+    This function breaks down the provided logical expression into individual
+    tokens representing variables, operators, negations, or symbols. It uses
+    the _generate_token function to generate tokens from characters in the
+    expression.
+
+    Args:
+        expression (str): The logical expression to tokenize.
+
+    Returns:
+        list: A list of tokens generated from the expression.
+
+    Raises:
+        SyntaxError: If the provided expression contains invalid tokens or
+        syntax.
+
+    Example:
+        >>> _tokenize_expression("p -> q")
+        [Token(value='p', token_type=<TokenType.VARIABLE: 0>, index=0),
+         Token(value='->', token_type=<TokenType.OPERATOR: 1>, index=1,
+         additional_space=1),
+         Token(value='q', token_type=<TokenType.VARIABLE: 0>, index=2)]
+    """
     position = 0
     i = 0
     tokens = []
@@ -89,7 +176,23 @@ def _tokenize_expression(expression):
         raise SyntaxError("Provided expression is not valid.")
 
 
-def _check_validity_token_list(token_list):
+def _check_validity_token_list(token_list: List[Token]) -> bool:
+    """
+    Check the validity of the token list representing a logical expression.
+
+    This function constructs a tokenized expression from the list of tokens
+    provided. It then attempts to evaluate the tokenized expression using
+    Python's eval function. If the expression is syntactically valid, it
+    returns True; otherwise, it returns False.
+
+    Args:
+        token_list (list): A list of Token objects representing the logical
+        expression.
+
+    Returns:
+        bool: True if the token list represents a valid logical expression,
+        False otherwise.
+    """
     tokenized_expression = []
     for token in token_list:
         if token.type == TokenType.VARIABLE:
@@ -109,16 +212,43 @@ def _check_validity_token_list(token_list):
         return False
 
 
-def prec(token):
-    if token.type == TokenType.NEGATION:
-        return 2
-    if token.type == TokenType.OPERATOR:
-        return 1
-    else:
-        return -1
+def infix_to_prefix(s: List) -> Tuple[List[Token], int]:
+    """
+    Convert an infix expression to a prefix expression.
 
+    This function takes an infix expression represented as a list of tokens
+    and converts it into a prefix expression.
 
-def infix_to_prefix(s):
+    Args:
+        s (list): A list of tokens representing the infix expression.
+
+    Returns:
+        tuple: A tuple containing the prefix expression as a list of tokens
+            and the position of the main connective in the original expression.
+
+    """
+
+    def prec(token: Token) -> int:
+        """
+        Determine the precedence of a token.
+
+        This function assigns a precedence value to a token based on its type.
+        Higher precedence values indicate higher priority in the order of
+        operations.
+
+        Args:
+            token (Token): The token for which to determine precedence.
+
+        Returns:
+            int: The precedence value of the token.
+        """
+
+        if token.type == TokenType.NEGATION:
+            return 2
+        if token.type == TokenType.OPERATOR:
+            return 1
+        else:
+            return -1
     result = []
     stack = []
 
